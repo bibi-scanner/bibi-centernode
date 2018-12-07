@@ -9,6 +9,7 @@ verify_ssl = true
 flask = "*"
 pyjwt = "*"
 flask-jwt = "*"
+uuid = "*"
 
 [requires]
 python_version = "3.7"

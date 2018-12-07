@@ -1,9 +1,11 @@
 import sqlite3
+import classes
 
 
 def connect():
     conn = sqlite3.connect('./test.db')
     print("Opened database successfully")
 
-connect()
+data = classes.Node()
 
+connect()

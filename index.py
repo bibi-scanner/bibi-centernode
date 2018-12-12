@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
+import datetime
+
+import interfaces.tasks as tasksInterfaces
 
 class User(object):
     def __init__(self, id, username, password):
@@ -34,9 +37,15 @@ def identity(payload):
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
+app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(seconds=30000)
 
 jwt = JWT(app, authenticate, identity)
 
+
+@app.route('/tasks', methods=['POST'])
+@jwt_required()
+def createTask():
+    return tasksInterfaces.crateTask()
 
 @app.route('/check')
 @jwt_required()
@@ -51,4 +60,4 @@ def protected():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=3000)

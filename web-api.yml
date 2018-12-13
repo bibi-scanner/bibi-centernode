@@ -221,28 +221,6 @@ paths:
                             $ref: "#/components/schemas/taskObject"
         400:
           $ref: '#/components/responses/400Error'
-    delete:
-      tags:
-        - 任务
-      description: 删除指定任务
-      parameters:
-        - $ref: "#/components/parameters/tokenHeaderParam"
-        - name: taskId
-          in: path
-          required: true
-          description: 指定任务ID
-          schema:
-            type: string
-      responses:
-        200:
-          description: 删除任务成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/successResonse"
-        400:
-          $ref: '#/components/responses/400Error'
   /tasks/{taskId}/report/donwload:
     get:
       tags:
@@ -340,61 +318,6 @@ paths:
                             $ref: "#/components/schemas/nodeObject"
         400:
           $ref: '#/components/responses/400Error'
-  /nodes/{nodeId}:
-    get:
-      tags:
-        - 节点
-      description: 获取节点详情
-      parameters:
-        - $ref: "#/components/parameters/tokenHeaderParam"
-        - name: nodeId
-          in: path
-          required: true
-          description: 指定节点ID
-          schema:
-            type: string
-      responses:
-        200:
-          description: 查询节点详情成功
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: "#/components/schemas/successResonse"
-                  - type: object
-                    required:
-                      - data
-                    properties:
-                      data:
-                        type: object
-                        required:
-                          - node
-                        properties:
-                          node:
-                            $ref: "#/components/schemas/nodeObject"
-        400:
-          $ref: '#/components/responses/400Error'
-    delete:
-      tags:
-        - 节点
-      description: 删除指定节点
-      parameters:
-        - $ref: "#/components/parameters/tokenHeaderParam"
-        - name: nodeId
-          in: path
-          required: true
-          description: 指定节点ID
-          schema:
-            type: string
-      responses:
-        200:
-          description: 删除节点成功
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/successResonse"
-        400:
-          $ref: '#/components/responses/400Error'
   /nodes/{nodeId}/ping:
     post:
       tags:
@@ -485,28 +408,6 @@ paths:
                         properties:
                           plugin:
                             $ref: "#/components/schemas/pluginObject"
-        400:
-          $ref: '#/components/responses/400Error'
-  /plugins/{pluginId}:
-    delete:
-      tags:
-        - 插件
-      description: 删除指定插件
-      parameters:
-        - $ref: "#/components/parameters/tokenHeaderParam"
-        - name: pluginId
-          in: path
-          required: true
-          description: 指定插件ID
-          schema:
-            type: string
-      responses:
-        200:
-          description: 删除插件成功
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/successResonse"
         400:
           $ref: '#/components/responses/400Error'
 

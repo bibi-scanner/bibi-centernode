@@ -75,6 +75,12 @@ def createTask():
 def queryTaskDetail(taskId):
     return tasksInterfaces.queryTaskDetail(taskId)
 
+# 查询节点列表
+@app.route('/nodes', methods=['GET'])
+@jwt_required()
+def queryNodes():
+    return nodesInterfaces.queryNodes()
+
 
 @app.route('/nodes', methods=['POST'])
 @jwt_required()

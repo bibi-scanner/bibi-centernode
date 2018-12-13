@@ -5,6 +5,7 @@ import datetime
 
 import interfaces.tasks as tasksInterfaces
 import interfaces.nodes as nodesInterfaces
+import interfaces.info as infoInterfaces
 
 class User(object):
     def __init__(self, id, username, password):
@@ -42,6 +43,14 @@ app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(seconds=30000)
 
 jwt = JWT(app, authenticate, identity)
 
+
+############################# webapi
+
+# 系统信息查询接口
+@app.route('/sysinfo', methods=['GET'])
+@jwt_required()
+def sysinfo():
+    return infoInterfaces.systemInfo()
 
 @app.route('/tasks', methods=['POST'])
 @jwt_required()

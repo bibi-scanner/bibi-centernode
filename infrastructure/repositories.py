@@ -1,6 +1,6 @@
 from infrastructure.db import Database
-from infrastructure.respositories.task import TaskRepository
-from infrastructure.respositories.node import NodeRepository
+from infrastructure.respositories.tasks import TaskRepository
+from infrastructure.respositories.nodes import NodeRepository
 
 
 class DomainRegistry:

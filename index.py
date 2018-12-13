@@ -52,6 +52,13 @@ jwt = JWT(app, authenticate, identity)
 def sysinfo():
     return infoInterfaces.systemInfo()
 
+# 任务列表查询接口
+@app.route('/tasks', methods=['GET'])
+@jwt_required()
+def queryTasks():
+    return tasksInterfaces.queryTasks()
+
+
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
 def createTask():

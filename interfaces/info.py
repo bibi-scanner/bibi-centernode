@@ -23,5 +23,7 @@ def systemInfo():
         "numberOfPlugins": numberOfPlugins,
     }
 
+    conn.close()
+
     return json.dumps(data)
 

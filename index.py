@@ -7,6 +7,7 @@ import interfaces.tasks as tasksInterfaces
 import interfaces.nodes as nodesInterfaces
 import interfaces.info as infoInterfaces
 
+
 class User(object):
     def __init__(self, id, username, password):
         self.id = id
@@ -15,6 +16,7 @@ class User(object):
 
     def __str__(self):
         return "User(id='%s')" % self.id
+
 
 users = [
     User(1, 'user1', 'abcxyz'),
@@ -52,6 +54,7 @@ jwt = JWT(app, authenticate, identity)
 def sysinfo():
     return infoInterfaces.systemInfo()
 
+
 # 任务列表查询接口
 @app.route('/tasks', methods=['GET'])
 @jwt_required()
@@ -59,10 +62,19 @@ def queryTasks():
     return tasksInterfaces.queryTasks()
 
 
+# 创建任务
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
 def createTask():
     return tasksInterfaces.createTask()
+
+
+# 获取指定任务详情
+@app.route('/tasks/<taskId>', methods=['GET'])
+@jwt_required()
+def queryTaskDetail(taskId):
+    return tasksInterfaces.queryTaskDetail(taskId)
+
 
 @app.route('/nodes', methods=['POST'])
 @jwt_required()

@@ -46,6 +46,35 @@ def queryTasks():
         "totalNumber": totalNumber
     })
 
+def queryTaskDetail(taskId):
+    db = Database()
+    conn = db.getConn()
+
+    task = conn.execute("SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, plugins, node_id, scan_result FROM tasks WHERE id = :id", {
+        "id": taskId
+    }).fetchone()
+
+    if not task:
+        return ("TASKID_IS_INEXISTENCE", 400)
+    else:
+        taskData = {
+            "id": task[0],
+            "name": task[1],
+            "status": task[2],
+            "createtime": task[3],
+            "completetime": task[4],
+            "progress": task[5],
+            "startIP": task[6],
+            "endIP": task[7],
+            "plugins": json.loads(task[8]),
+            "nodeId": task[9],
+            "scan_result": task[10] or None
+        }
+    conn.close()
+
+    return json.dumps({
+        "task": taskData
+    })
 
 def createTask():
     data = request.data

@@ -1,0 +1,707 @@
+openapi: 3.0.0
+info:
+  version: '0.0.1'
+  title: 'web端'
+  description: 'web端'
+
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bibiscaner/web/0.0.1
+
+tags:
+  - name: 系统
+    description: 系统接口
+  - name: 任务
+    description: 任务相关接口
+  - name: 节点
+    description: 节点相关接口
+  - name: 插件
+    description: 插件相关接口
+
+paths:
+  /auth:
+    post:
+      tags:
+        - 系统
+      description: 登录接口,传入密码获取TOKEN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - passwrod
+              properties:
+                passwrod:
+                  type: string
+      responses:
+        200:
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - access_token
+                        properties:
+                          token:
+                            type: string
+        400:
+          $ref: '#/components/responses/400Error'
+  /sysinfo:
+    get:
+      tags:
+        - 系统
+      description: 获取系统信息
+      responses:
+        200:
+          description: 获取系统成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - numberOfTasks
+                          - numberOfWaitingTasks
+                          - numberOfRunningTasks
+                          - numberOfFinishTasks
+                          - numberOfNodes
+                          - numberOfPlugins
+                        properties:
+                          numberOfTasks:
+                            type: integer
+                          numberOfWaitingTasks:
+                            type: integer
+                          numberOfRunningTasks:
+                            type: integer
+                          numberOfFinishTasks:
+                            type: integer
+                          numberOfNodes:
+                            type: integer
+                          numberOfPlugins:
+                            type: integer
+        400:
+          $ref: '#/components/responses/400Error'
+
+  #任务相关接口
+  /tasks:
+    get:
+      tags:
+        - 任务
+      description: 获取任务列表接口
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+        - $ref: "#/components/parameters/filterParam"
+      responses:
+        200:
+          description: 查询任务列表成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - tasks
+                        properties:
+                          tasks:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/taskBaseObject"
+                          totalNumber:
+                            type: number
+        400:
+          $ref: '#/components/responses/400Error'
+    post:
+      tags:
+        - 任务
+      description: 创建新的任务
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - target
+                - plugins
+              properties:
+                name:
+                  type: string
+                startIP:
+                  type: number
+                endIP:
+                  type: number
+                plugins:
+                  type: array
+                  items:
+                    type: string
+                node:
+                  type: string
+      responses:
+        200:
+          description: 创建任务成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                      - totalNumber
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - task
+                        properties:
+                          task:
+                            $ref: "#/components/schemas/taskObject"
+        400:
+          $ref: '#/components/responses/400Error'
+  /tasks/{taskId}:
+    get:
+      tags:
+        - 任务
+      description: 获取任务详情
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: taskId
+          in: path
+          required: true
+          description: 指定任务ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 查询任务详情成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - task
+                        properties:
+                          task:
+                            $ref: "#/components/schemas/taskObject"
+        400:
+          $ref: '#/components/responses/400Error'
+    delete:
+      tags:
+        - 任务
+      description: 删除指定任务
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: taskId
+          in: path
+          required: true
+          description: 指定任务ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 删除任务成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+        400:
+          $ref: '#/components/responses/400Error'
+  /tasks/{taskId}/report/donwload:
+    get:
+      tags:
+        - 任务
+      description: 下载任务的报告书
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: taskId
+          in: path
+          required: true
+          description: 指定任务ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 获取成功
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/400Error'
+
+  #节点相关接口
+  /nodes:
+    get:
+      tags:
+        - 节点
+      description: 获取节点列表接口
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+        - $ref: "#/components/parameters/filterParam"
+      responses:
+        200:
+          description: 查询节点列表成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - nodes
+                        properties:
+                          nodes:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/nodeObject"
+        400:
+          $ref: '#/components/responses/400Error'
+    post:
+      tags:
+        - 节点
+      description: 添加节点
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+      responses:
+        200:
+          description: 添加节点成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - node
+                        properties:
+                          node:
+                            $ref: "#/components/schemas/nodeObject"
+        400:
+          $ref: '#/components/responses/400Error'
+  /nodes/{nodeId}:
+    get:
+      tags:
+        - 节点
+      description: 获取节点详情
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: nodeId
+          in: path
+          required: true
+          description: 指定节点ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 查询节点详情成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - node
+                        properties:
+                          node:
+                            $ref: "#/components/schemas/nodeObject"
+        400:
+          $ref: '#/components/responses/400Error'
+    delete:
+      tags:
+        - 节点
+      description: 删除指定节点
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: nodeId
+          in: path
+          required: true
+          description: 指定节点ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 删除节点成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/successResonse"
+        400:
+          $ref: '#/components/responses/400Error'
+  /nodes/{nodeId}/ping:
+    post:
+      tags:
+        - 节点
+      description: 探测节点是否存活
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: nodeId
+          in: path
+          required: true
+          description: 指定节点ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 节点存活
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/successResonse"
+        400:
+          $ref: '#/components/responses/400Error'
+
+  #插件相关接口
+  /plugins:
+    get:
+      tags:
+        - 插件
+      description: 获取插件列表接口
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - $ref: "#/components/parameters/offsetParam"
+        - $ref: "#/components/parameters/limitParam"
+        - $ref: "#/components/parameters/sortParam"
+        - $ref: "#/components/parameters/filterParam"
+      responses:
+        200:
+          description: 查询插件列表成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - plugins
+                        properties:
+                          plugins:
+                            type: array
+                            items:
+                              $ref: "#/components/schemas/pluginObject"
+        400:
+          $ref: '#/components/responses/400Error'
+    post:
+      tags:
+        - 插件
+      description: 上传插件
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+      requestBody:
+        required: true
+        content:
+          application/zip:
+            schema:
+              type: string
+              format: binary
+      responses:
+        200:
+          description: 上传插插件成功
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/successResonse"
+                  - type: object
+                    required:
+                      - data
+                    properties:
+                      data:
+                        type: object
+                        required:
+                          - plugin
+                        properties:
+                          plugin:
+                            $ref: "#/components/schemas/pluginObject"
+        400:
+          $ref: '#/components/responses/400Error'
+  /plugins/{pluginId}:
+    delete:
+      tags:
+        - 插件
+      description: 删除指定插件
+      parameters:
+        - $ref: "#/components/parameters/tokenHeaderParam"
+        - name: pluginId
+          in: path
+          required: true
+          description: 指定插件ID
+          schema:
+            type: string
+      responses:
+        200:
+          description: 删除插件成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/successResonse"
+        400:
+          $ref: '#/components/responses/400Error'
+
+components:
+  responses:
+    400Error:
+      description: 请求错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+  schemas:
+    successResonse:
+        type: object
+        required:
+          - code
+          - msg
+        properties:
+          code:
+            type: number
+          msg:
+            type: string
+    errorResponse:
+      type: object
+      required:
+        - code
+        - msg
+      properties:
+        code:
+          type: number
+        msg:
+          type: string
+
+    #任务基础对象
+    taskBaseObject:
+      type: object
+      required:
+        - id
+        - name
+        - status
+        - createtime
+        - completetime
+        - progress
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: number
+          enum: [0,1,2]
+        createtime:
+          type: number
+        progress:
+          type: number
+          format: float
+          maximum: 1
+          minimum: 0
+    #任务完整对象
+    taskObject:
+      allOf:
+        - $ref: "#/components/schemas/taskBaseObject"
+        - type: object
+          required:
+            - target
+          properties:
+            target:
+              type: string
+            plugins:
+              type: array
+              items:
+                type: string
+            nodes:
+              type: array
+              items:
+                type: string
+            numberOfHosts:
+              type: integer
+            numberOfPorts:
+              type: integer
+            numberOfWarnings:
+              type: integer
+            hosts:
+              type: array
+              items:
+                type: object
+                required:
+                  - host
+                properties:
+                  host:
+                    type: string
+                  numberOfPorts:
+                    type: integer
+                  numberOfWarnings:
+                    type: integer
+                  ports:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - port
+                      properties:
+                        port:
+                          type: number
+                        numberOfWarnings:
+                          type: integer
+                        warnings:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - description
+                              - plugin
+                            properties:
+                              description:
+                                type: string
+                              plugin:
+                                type: string
+
+    #节点对象
+    nodeObject:
+      type: object
+      required:
+        - id
+        - name
+        - lastactivetime
+        - secretkey
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lastactivetime:
+          type: string
+        lastactivehost:
+          type: string
+        lastactiveport:
+          type: integer
+        active:
+          type: boolean
+        secretkey:
+          type: string
+
+    #插件对象
+    pluginObject:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - author
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        author:
+          type: string
+
+
+  parameters:
+    tokenHeaderParam:
+      name: X-USER-TOKEN
+      in: header
+      required: true
+      description: 操作验证码
+      schema:
+        type: string
+    offsetParam:
+      name: offset
+      in: query
+      required: false
+      description: 查询偏移量
+      schema:
+        type: integer
+    limitParam:
+      name: limit
+      in: query
+      required: false
+      description: 查询的数量
+      schema:
+        type: integer
+    sortParam:
+      name: sort
+      in: query
+      required: false
+      description: 查询的排序
+      schema:
+        type: string
+    filterParam:
+      name: filter
+      in: query
+      required: false
+      description: 查询的筛选
+      schema:
+        type: string

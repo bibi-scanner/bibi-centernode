@@ -6,6 +6,7 @@ import datetime
 import interfaces.tasks as tasksInterfaces
 import interfaces.nodes as nodesInterfaces
 import interfaces.info as infoInterfaces
+import interfaces.plugins as pluginsInterfaces
 
 
 class User(object):
@@ -81,11 +82,29 @@ def queryTaskDetail(taskId):
 def queryNodes():
     return nodesInterfaces.queryNodes()
 
-
+# 创建节点
 @app.route('/nodes', methods=['POST'])
 @jwt_required()
 def createNode():
     return nodesInterfaces.createNode()
+
+# ping节点
+@app.route('/nodes/<nodeId>/ping', methods=['POST'])
+@jwt_required()
+def pingNode():
+    return nodesInterfaces.pingNode()
+
+# 上传插件
+@app.route('/plugins', methods=['GET'])
+@jwt_required()
+def queryPlugins():
+    return pluginsInterfaces.queryPlugins()
+
+# 上传插件
+@app.route('/plugins', methods=['POST'])
+@jwt_required()
+def uploadPlugin():
+    return pluginsInterfaces.uploadPlugin()
 
 
 if __name__ == '__main__':

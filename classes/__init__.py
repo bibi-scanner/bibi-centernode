@@ -44,10 +44,11 @@ class Node(object):
 
 class Plugin(object):
 
-    def __init__(self, name, description):
-        self.id = uuid()
-        self.name = name
-        self.description = description
+    def __init__(self):
+        self.id = str(uuid())
+        self.name = ""
+        self.description = ""
+        self.file = b""
 
 
 class TaskStatus(Enum):

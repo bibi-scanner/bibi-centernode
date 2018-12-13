@@ -1,6 +1,7 @@
 from infrastructure.db import Database
 from infrastructure.respositories.tasks import TaskRepository
 from infrastructure.respositories.nodes import NodeRepository
+from infrastructure.respositories.plugins import PluginsRepository
 
 
 class DomainRegistry:
@@ -13,6 +14,9 @@ class DomainRegistry:
 
     def NodeRepository(self):
         return NodeRepository(db=self.db)
+
+    def PluginsRepository(self):
+        return PluginsRepository(db=self.db)
 
 
 domainRegistry = DomainRegistry()

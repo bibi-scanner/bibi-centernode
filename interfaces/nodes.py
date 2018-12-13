@@ -57,3 +57,6 @@ def createNode():
     getDomainRegistry().NodeRepository().save(node)
 
     return json.dumps(node.__dict__)
+
+def pingNode():
+    return "???"

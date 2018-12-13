@@ -4,6 +4,7 @@ from werkzeug.security import safe_str_cmp
 import datetime
 
 import interfaces.tasks as tasksInterfaces
+import interfaces.nodes as nodesInterfaces
 
 class User(object):
     def __init__(self, id, username, password):
@@ -45,18 +46,12 @@ jwt = JWT(app, authenticate, identity)
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
 def createTask():
-    return tasksInterfaces.crateTask()
+    return tasksInterfaces.createTask()
 
-@app.route('/check')
+@app.route('/nodes', methods=['POST'])
 @jwt_required()
-def check():
-    return "ok"
-
-
-@app.route('/protected')
-@jwt_required()
-def protected():
-    return '%s' % current_identity
+def createNode():
+    return nodesInterfaces.createNode()
 
 
 if __name__ == '__main__':

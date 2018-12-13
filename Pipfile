@@ -10,6 +10,10 @@ flask = "*"
 pyjwt = "*"
 flask-jwt = "*"
 uuid = "*"
+crypto = "*"
+pycrypto = "*"
+pycryptodome = "*"
+pycryptodomex = "*"
 
 [requires]
 python_version = "3.7"

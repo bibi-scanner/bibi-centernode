@@ -2,9 +2,9 @@ from flask import request
 import json
 from classes import Task
 from infrastructure.repositories import getDomainRegistry
+import time
 
-
-def crateTask():
+def createTask():
     data = request.data
     data = json.loads(data)
     assert data["name"]
@@ -19,6 +19,7 @@ def crateTask():
     task.endIP = data["endIP"]
     task.plugins = data["plugins"]
     task.nodeId = data["nodeId"]
+    task.createtime = int(round(time.time() * 1000))
 
     getDomainRegistry().TaskRepository().save(task)
 

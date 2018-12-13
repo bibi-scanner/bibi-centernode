@@ -20,6 +20,7 @@ PRAGMA foreign_keys = false;
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS "nodes" (
   "id" text NOT NULL,
+  "name" text,
   "ip" integer,
   "port" integer,
   "key" text,

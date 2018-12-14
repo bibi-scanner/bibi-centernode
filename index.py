@@ -91,8 +91,13 @@ def createNode():
 # ping节点
 @app.route('/nodes/<nodeId>/ping', methods=['POST'])
 @jwt_required()
-def pingNode():
-    return nodesInterfaces.pingNode()
+def pingNode(nodeId):
+    return nodesInterfaces.pingNode(nodeId)
+
+# 节点注册
+@app.route('/nodes/registry', methods=['POST'])
+def registryNode():
+    return nodesInterfaces.registryNode()
 
 # 上传插件
 @app.route('/plugins', methods=['GET'])

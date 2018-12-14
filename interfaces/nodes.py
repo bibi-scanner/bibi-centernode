@@ -1,8 +1,13 @@
 from flask import request
+import requests
 import json
 from classes import Node
 from infrastructure.repositories import getDomainRegistry
 from infrastructure.db import Database
+from classes.aescrpyto import AESCrpyto
+import classes.ip2address
+import socket
+import time
 
 
 def queryNodes():
@@ -58,5 +63,45 @@ def createNode():
 
     return json.dumps(node.__dict__)
 
-def pingNode():
-    return "???"
+
+def registryNode():
+    data = request.data
+    data = json.loads(data)
+
+    node = getDomainRegistry().NodeRepository().getNodeById(data["id"])
+
+    if not node:
+        return "NULL NODE", 400
+
+    r = requests.post("http://" + data["ip"] + ":" + str(data["port"]) + "/ping")
+    if r.status_code == 200:
+        node.ip = classes.ip2address.ip2long(data["ip"])
+        node.port = data["port"]
+        node.lastActiveTime = int(round(time.time() * 1000))
+    else:
+        node.ip = 0
+        node.port = 0
+
+    getDomainRegistry().NodeRepository().save(node)
+
+    return "ok"
+
+
+def pingNode(nodeId):
+    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
+
+    if not node:
+        return "NULL NODE", 400
+
+    if not node.ip:
+        return "NULL IP", 400
+
+    r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/ping")
+    if r.status_code == 200:
+        node.lastActiveTime = int(round(time.time() * 1000))
+    else:
+        return "NOT_ACTIVE", 400
+
+    getDomainRegistry().NodeRepository().save(node)
+
+    return "ok"

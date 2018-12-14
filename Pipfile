@@ -11,9 +11,9 @@ pyjwt = "*"
 flask-jwt = "*"
 uuid = "*"
 crypto = "*"
-pycrypto = "*"
 pycryptodome = "*"
 pycryptodomex = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"

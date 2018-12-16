@@ -2,6 +2,7 @@ from flask import Flask
 from flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
 import datetime
+from flask_cors import CORS
 
 import interfaces.tasks as tasksInterfaces
 import interfaces.nodes as nodesInterfaces
@@ -20,8 +21,7 @@ class User(object):
 
 
 users = [
-    User(1, 'user1', 'abcxyz'),
-    User(2, 'user2', 'abcxyz'),
+    User(1, 'admin', '123456a'),
 ]
 
 username_table = {u.username: u for u in users}
@@ -43,11 +43,18 @@ app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
 app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(seconds=30000)
+CORS(app)
 
 jwt = JWT(app, authenticate, identity)
 
 
 ############################# webapi
+
+# 登录检测接口
+@app.route('/authcheck', methods=['GET'])
+@jwt_required()
+def authcheck():
+    return "ok"
 
 # 系统信息查询接口
 @app.route('/sysinfo', methods=['GET'])
@@ -64,6 +71,7 @@ def queryTasks():
 
 
 # 创建任务
+# TODO
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
 def createTask():
@@ -71,6 +79,7 @@ def createTask():
 
 
 # 获取指定任务详情
+# TODO
 @app.route('/tasks/<taskId>', methods=['GET'])
 @jwt_required()
 def queryTaskDetail(taskId):
@@ -83,29 +92,34 @@ def queryNodes():
     return nodesInterfaces.queryNodes()
 
 # 创建节点
+# TODO
 @app.route('/nodes', methods=['POST'])
 @jwt_required()
 def createNode():
     return nodesInterfaces.createNode()
 
 # ping节点
+# TODO
 @app.route('/nodes/<nodeId>/ping', methods=['POST'])
 @jwt_required()
 def pingNode(nodeId):
     return nodesInterfaces.pingNode(nodeId)
 
 # 节点注册
+# TODO
 @app.route('/nodes/registry', methods=['POST'])
 def registryNode():
     return nodesInterfaces.registryNode()
 
-# 上传插件
+# 获取插件列表
+# TODO
 @app.route('/plugins', methods=['GET'])
 @jwt_required()
 def queryPlugins():
     return pluginsInterfaces.queryPlugins()
 
 # 上传插件
+# TODO
 @app.route('/plugins', methods=['POST'])
 @jwt_required()
 def uploadPlugin():
@@ -113,4 +127,4 @@ def uploadPlugin():
 
 
 if __name__ == '__main__':
-    app.run(port=3000)
+    app.run(port=3000, host="0.0.0.0")

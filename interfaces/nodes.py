@@ -24,7 +24,7 @@ def queryNodes():
     except:
         limit = 10
 
-    sql = "SELECT id, name, ip, port, key, last_activetime FROM nodes ORDER BY last_activetime LIMIT :limit OFFSET :offset"
+    sql = "SELECT id, name, active, ip, port, key, last_activetime FROM nodes ORDER BY last_activetime LIMIT :limit OFFSET :offset"
 
     nodes = conn.execute(sql, {
         "offset": offset,
@@ -37,10 +37,11 @@ def queryNodes():
         datas.append({
             "id": node[0],
             "name": node[1],
-            "ip": node[2],
-            "port": node[3],
-            "key": node[4],
-            "last_activetime": node[5],
+            "active": node[2],
+            "ip": node[3],
+            "port": node[4],
+            "key": node[5],
+            "lastActivetime": node[6],
         })
 
     conn.close()
@@ -73,14 +74,15 @@ def registryNode():
     if not node:
         return "NULL NODE", 400
 
-    r = requests.post("http://" + data["ip"] + ":" + str(data["port"]) + "/ping")
-    if r.status_code == 200:
+    try:
+        r = requests.post("http://" + data["ip"] + ":" + str(data["port"]) + "/ping")
+        node.active = 1
         node.ip = classes.ip2address.ip2long(data["ip"])
         node.port = data["port"]
         node.lastActiveTime = int(round(time.time() * 1000))
-    else:
-        node.ip = 0
-        node.port = 0
+    except:
+        node.active = 0
+
 
     getDomainRegistry().NodeRepository().save(node)
 
@@ -96,12 +98,17 @@ def pingNode(nodeId):
     if not node.ip:
         return "NULL IP", 400
 
-    r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/ping")
-    if r.status_code == 200:
+    try:
+        r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/ping")
         node.lastActiveTime = int(round(time.time() * 1000))
-    else:
+        node.active = 1
+    except:
+        node.active = 0
         return "NOT_ACTIVE", 400
 
     getDomainRegistry().NodeRepository().save(node)
 
-    return "ok"
+    return json.dumps({
+        "active": node.active,
+        "lastActivetime": node.lastActiveTime
+    })

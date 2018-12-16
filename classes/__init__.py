@@ -9,6 +9,7 @@ class Node(object):
 
         self.id = str(uuid())  # 节点ID
         self.name = ""  # 节点名称
+        self.active = 0
         self.ip = 0  # 节点IP
         self.port = 0  # 节点端口
         self.key = c.getKeyAndNonce()  # 节点的秘钥

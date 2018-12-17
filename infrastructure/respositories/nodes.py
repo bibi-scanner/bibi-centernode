@@ -20,7 +20,7 @@ class NodeRepository:
             node.ip = data[3]
             node.port = data[4]
             node.key = data[5]
-            node.last_activetime = data[6]
+            node.lastActiveTime = data[6]
         except:
             return None
 

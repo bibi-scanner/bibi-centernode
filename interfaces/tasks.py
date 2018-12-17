@@ -20,7 +20,7 @@ def queryTasks():
     except:
         limit = 10
 
-    sql = "SELECT id, name, status, createtime, completetime, progress FROM tasks ORDER BY createtime LIMIT :limit OFFSET :offset"
+    sql = "SELECT id, name, status, createtime, completetime, progress FROM tasks ORDER BY createtime DESC LIMIT :limit OFFSET :offset"
 
     tasks = conn.execute(sql, {
         "offset": offset,

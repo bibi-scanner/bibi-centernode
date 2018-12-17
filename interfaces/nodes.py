@@ -24,7 +24,7 @@ def queryNodes():
     except:
         limit = 10
 
-    sql = "SELECT id, name, active, ip, port, key, last_activetime FROM nodes ORDER BY last_activetime LIMIT :limit OFFSET :offset"
+    sql = "SELECT id, name, active, ip, port, key, last_activetime FROM nodes ORDER BY last_activetime DESC LIMIT :limit OFFSET :offset"
 
     nodes = conn.execute(sql, {
         "offset": offset,
@@ -104,11 +104,13 @@ def pingNode(nodeId):
         node.active = 1
     except:
         node.active = 0
-        return "NOT_ACTIVE", 400
 
     getDomainRegistry().NodeRepository().save(node)
 
-    return json.dumps({
-        "active": node.active,
-        "lastActivetime": node.lastActiveTime
-    })
+    if node.active:
+        return json.dumps({
+            "active": node.active,
+            "lastActivetime": node.lastActiveTime
+        })
+    else:
+        return "NOT_ACTIVE", 400

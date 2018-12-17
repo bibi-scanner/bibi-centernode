@@ -111,6 +111,18 @@ def pingNode(nodeId):
 def registryNode():
     return nodesInterfaces.registryNode()
 
+# 节点获取任务
+# TODO
+@app.route('/nodes/<nodeId>/tasks', methods=['GET'])
+def getNodeTasks(nodeId):
+    return nodesInterfaces.getNodeTasks(nodeId)
+
+# 节点任务状态更新
+# TODO
+@app.route('/nodes/<nodeId>/tasks/update', methods=['POST'])
+def updateNodeTasks(nodeId):
+    return nodesInterfaces.updateNodeTasks(nodeId)
+
 # 获取插件列表
 # TODO
 @app.route('/plugins', methods=['GET'])

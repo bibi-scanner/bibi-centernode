@@ -51,6 +51,41 @@ def queryNodes():
         "totalNumber": totalNumber
     })
 
+def getNodeTasks(nodeId):
+    db = Database()
+    conn = db.getConn()
+
+    sql = "SELECT id, status, start_ip, end_ip, plugins FROM tasks WHERE node_id = :nodeId ORDER BY createtime DESC"
+
+    tasks = conn.execute(sql, {
+        "nodeId": nodeId
+    }).fetchall()
+
+    datas = []
+    for task in tasks:
+        datas.append({
+            "id": task[0],
+            "status": task[1],
+            "startIP": task[2],
+            "endIP": task[3],
+            "plugins": task[4]
+        })
+
+    conn.close()
+
+    return json.dumps({
+        "tasks": datas
+    })
+
+def updateNodeTasks(nodeId):
+    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
+
+    if not node:
+        return "NULL_NODE", 400
+
+    node.updateNodeTasks()
+
+    return "123"
 
 def createNode():
     data = request.data
@@ -63,7 +98,6 @@ def createNode():
     getDomainRegistry().NodeRepository().save(node)
 
     return json.dumps(node.__dict__)
-
 
 def registryNode():
     data = request.data

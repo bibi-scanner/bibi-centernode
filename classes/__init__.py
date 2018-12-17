@@ -1,6 +1,10 @@
 from uuid import uuid4 as uuid
 from enum import Enum
 from classes.aescrpyto import AESCrpyto
+import requests
+import classes.ip2address
+import json
+import threading
 
 class Node(object):
 
@@ -14,6 +18,18 @@ class Node(object):
         self.port = 0  # 节点端口
         self.key = c.getKeyAndNonce()  # 节点的秘钥
         self.lastActiveTime = 0  # 上次活跃时间
+
+    def updateNodeTasks(self):
+        from interfaces.tasks import updateTaskInfo
+
+        r = requests.get("http://" + classes.ip2address.long2ip(self.ip) + ":" + str(self.port) + "/tasksinfo")
+        data = r.content
+        data = json.loads(data)
+        tasks = data["tasks"]
+        for task in tasks:
+            threading.Thread(target=updateTaskInfo, args=[task["id"], task["progress"], task["result"]]).start()
+
+        return ""
 
 
 class Plugin(object):
@@ -58,42 +74,6 @@ class Task:
         data["endIP"] = self.endIP
         data["nodeId"] = self.nodeId
         data["plugins"] = self.nodeId
-        if self.scanResult:
-            data["scanResult"] = self.scanResult.__dict__
+        data["scanResult"] = self.scanResult
 
         return data
-
-
-class ScanResult:
-
-    def __init__(self):
-        self.numberOfIPs = 0
-        self.numberOfPorts = 0
-        self.numberOfWarnings = 0
-        self.scanIPResults = []
-
-
-class ScanIPResult:
-
-    def __init__(self):
-        self.ip = 0
-        self.numberOfPorts = 0
-        self.numberOfWarnings = 0
-        self.scanPortResults = []
-
-
-class ScanPortResult:
-
-    def __init__(self):
-        self.port = 0
-        self.numberOfWarnings = 0
-        self.warnings = []
-
-
-class ScanWarning:
-
-    def __init__(self):
-        self.ip = 0
-        self.port = 0
-        self.plugin = None
-        self.description = ""

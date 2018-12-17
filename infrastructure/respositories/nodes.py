@@ -11,6 +11,7 @@ class NodeRepository:
         data = conn.execute("SELECT id, name, active, ip, port, key, last_activetime FROM nodes WHERE id=:id", {
             "id": id
         }).fetchone()
+        conn.close()
 
         try:
             node = Node()

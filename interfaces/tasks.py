@@ -1,9 +1,11 @@
-import time
+import time, datetime
 import json
 from flask import request
-from classes import Task
+from classes import Task, TaskStatus
 from infrastructure.repositories import getDomainRegistry
 from infrastructure.db import Database
+import requests
+import classes.ip2address
 
 
 def queryTasks():
@@ -96,3 +98,36 @@ def createTask():
     getDomainRegistry().TaskRepository().save(task)
 
     return json.dumps(task.toDict())
+
+
+
+def updateTaskInfo(id, progress, result):
+    task = getDomainRegistry().TaskRepository().getTaskById(id)
+
+    if task.status == TaskStatus(2):
+        closeTask(id)
+        return
+
+    task.progress = progress
+    task.scanResult = result
+
+    if progress == 0:
+        task.status = TaskStatus(0)
+    elif progress == 1 and result:
+        closeTask(id)
+        task.status = TaskStatus(2)
+        task.completetime = int(round(time.time() * 1000))
+    else:
+        task.status = TaskStatus(1)
+
+    getDomainRegistry().TaskRepository().save(task)
+
+def closeTask(id):
+    task = getDomainRegistry().TaskRepository().getTaskById(id)
+    nodeId = task.nodeId
+    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
+
+    if node:
+        r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/tasks/"+ task.id +"/complete")
+
+

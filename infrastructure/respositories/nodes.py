@@ -1,6 +1,7 @@
 from classes import Node
 import json
 
+
 class NodeRepository:
 
     def __init__(self, db):
@@ -8,63 +9,50 @@ class NodeRepository:
 
     def getNodeById(self, id):
         conn = self.db.getConn()
-        data = conn.execute("SELECT id, name, active, ip, port, key, last_activetime FROM nodes WHERE id=:id", {
-            "id": id
-        }).fetchone()
+        c = conn.cursor()
+
+        c.execute("SELECT id, name, active, ip, port, `key`, last_activetime as lastActiveTime FROM nodes WHERE id=%s", (id))
+        data = c.fetchone()
+
+        c.close()
         conn.close()
 
         try:
             node = Node()
-            node.id = data[0]
-            node.name = data[1]
-            node.active = data[2]
-            node.ip = data[3]
-            node.port = data[4]
-            node.key = data[5]
-            node.lastActiveTime = data[6]
+            node.id = data["id"]
+            node.name = data["name"]
+            node.active = data["active"]
+            node.ip = data["ip"]
+            node.port = data["port"]
+            node.key = data["key"]
+            node.lastActiveTime = data["lastActiveTime"]
         except:
             return None
 
         return node
 
-
     def save(self, node):
         conn = self.db.getConn()
         c = conn.cursor()
-        data = c.execute("SELECT * FROM nodes WHERE id=:id", {
-            "id": node.id
-        }).fetchone()
+        c.execute("SELECT * FROM nodes WHERE id=%s", (node.id))
+        data = c.fetchone()
 
         if data:
             c.execute("UPDATE nodes SET "
-                      "name=:name,"
-                      "ip=:ip,"
-                      "active=:active,"
-                      "port=:port,"
-                      "key=:key,"
-                      "last_activetime=:lastActiveTime"
-                      " WHERE id=:id", {
-                          "id": node.id,
-                          "name": node.name,
-                          "active": node.active,
-                          "ip": node.ip,
-                          "port": node.port,
-                          "key": node.key,
-                          "lastActiveTime": node.lastActiveTime
-                      })
+                      "name=%s,"
+                      "active=%s,"
+                      "ip=%s,"
+                      "port=%s,"
+                      "`key`=%s,"
+                      "last_activetime=%s"
+                      " WHERE id=%s",
+                      (node.name, node.active, node.ip, node.port, node.key, node.lastActiveTime, node.id))
         else:
-            c.execute("INSERT INTO nodes (id, name, active, ip, port, key, last_activetime)"
-                      "VALUES (:id, :name, :active, :ip, :port, :key, :lastActiveTime)", {
-                          "id": node.id,
-                          "name": node.name,
-                          "active": node.active,
-                          "ip": node.ip,
-                          "port": node.port,
-                          "key": node.key,
-                          "lastActiveTime": node.lastActiveTime
-                      })
+            c.execute("INSERT INTO nodes (id, name, active, ip, port, `key`, last_activetime) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+                      (node.id, node.name, node.active, node.ip, node.port, node.key ,node.lastActiveTime))
+
         conn.commit()
+        c.close()
         conn.close()
 
         return None
-

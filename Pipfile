@@ -15,6 +15,7 @@ pycryptodome = "*"
 pycryptodomex = "*"
 requests = "*"
 flask-cors = "*"
+pymysql = "*"
 
 [requires]
 python_version = "3.7"

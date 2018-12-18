@@ -9,84 +9,6 @@ import classes.ip2address
 import socket
 import time
 
-
-def queryNodes():
-    db = Database()
-    conn = db.getConn()
-
-    try:
-        offset = int(request.args["offset"]) or 0
-    except:
-        offset = 0
-
-    try:
-        limit = int(request.args["limit"]) or 10
-    except:
-        limit = 10
-
-    sql = "SELECT id, name, active, ip, port, key, last_activetime FROM nodes ORDER BY last_activetime DESC LIMIT :limit OFFSET :offset"
-
-    nodes = conn.execute(sql, {
-        "offset": offset,
-        "limit": limit
-    }).fetchall()
-    totalNumber = conn.execute("SELECT COUNT(*) FROM nodes").fetchone()[0]
-
-    datas = []
-    for node in nodes:
-        datas.append({
-            "id": node[0],
-            "name": node[1],
-            "active": node[2],
-            "ip": node[3],
-            "port": node[4],
-            "key": node[5],
-            "lastActivetime": node[6],
-        })
-
-    conn.close()
-
-    return json.dumps({
-        "nodes": datas,
-        "totalNumber": totalNumber
-    })
-
-def getNodeTasks(nodeId):
-    db = Database()
-    conn = db.getConn()
-
-    sql = "SELECT id, status, start_ip, end_ip, plugins FROM tasks WHERE node_id = :nodeId ORDER BY createtime DESC"
-
-    tasks = conn.execute(sql, {
-        "nodeId": nodeId
-    }).fetchall()
-
-    datas = []
-    for task in tasks:
-        datas.append({
-            "id": task[0],
-            "status": task[1],
-            "startIP": task[2],
-            "endIP": task[3],
-            "plugins": task[4]
-        })
-
-    conn.close()
-
-    return json.dumps({
-        "tasks": datas
-    })
-
-def updateNodeTasks(nodeId):
-    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
-
-    if not node:
-        return "NULL_NODE", 400
-
-    node.updateNodeTasks()
-
-    return "123"
-
 def createNode():
     data = request.data
     data = json.loads(data)
@@ -98,6 +20,65 @@ def createNode():
     getDomainRegistry().NodeRepository().save(node)
 
     return json.dumps(node.__dict__)
+
+def queryNodes():
+    try:
+        offset = int(request.args["offset"]) or 0
+    except:
+        offset = 0
+
+    try:
+        limit = int(request.args["limit"]) or 10
+    except:
+        limit = 10
+
+    db = Database()
+    conn = db.getConn()
+    c = conn.cursor()
+
+    c.execute(
+        "SELECT id, name, active, ip, port, `key`, last_activetime as lastActivetime FROM nodes ORDER BY last_activetime DESC LIMIT %s OFFSET %s",
+        (limit, offset))
+    nodes = c.fetchall()
+
+    c.execute("SELECT COUNT(*) as count FROM nodes")
+    totalNumber = c.fetchone()["count"]
+
+    c.close()
+    conn.close()
+
+    return json.dumps({
+        "nodes": nodes,
+        "totalNumber": totalNumber
+    })
+
+def getNodeTasks(nodeId):
+    db = Database()
+    conn = db.getConn()
+    cr = conn.cursor()
+
+    cr.execute("SELECT id, status, start_ip as startIP, end_ip as endIP, plugins FROM tasks WHERE node_id = %s", (nodeId))
+    tasks = cr.fetchall()
+
+    cr.close()
+    conn.close()
+
+    for task in tasks:
+        task["plugins"] = json.loads(task["plugins"])
+
+    return json.dumps({
+        "tasks": tasks
+    })
+
+def updateNodeTasks(nodeId):
+    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
+
+    if not node:
+        return "NULL_NODE", 400
+
+    node.updateNodeTasks()
+
+    return "123"
 
 def registryNode():
     data = request.data

@@ -3,6 +3,7 @@ from flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
 import datetime
 from flask_cors import CORS
+import threading
 
 import interfaces.tasks as tasksInterfaces
 import interfaces.nodes as nodesInterfaces
@@ -138,5 +139,10 @@ def uploadPlugin():
     return pluginsInterfaces.uploadPlugin()
 
 
+
+
+
 if __name__ == '__main__':
+    from interfaces.tasks import autoUpdateTasksInfo
+    autoUpdateTasksInfo()
     app.run(port=3000, host="0.0.0.0")

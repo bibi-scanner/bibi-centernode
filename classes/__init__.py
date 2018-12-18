@@ -21,8 +21,11 @@ class Node(object):
 
     def updateNodeTasks(self):
         from interfaces.tasks import updateTaskInfo
+        try:
+            r = requests.get("http://" + classes.ip2address.long2ip(self.ip) + ":" + str(self.port) + "/tasksinfo")
+        except:
+            return ""
 
-        r = requests.get("http://" + classes.ip2address.long2ip(self.ip) + ":" + str(self.port) + "/tasksinfo")
         data = r.content
         data = json.loads(data)
         tasks = data["tasks"]

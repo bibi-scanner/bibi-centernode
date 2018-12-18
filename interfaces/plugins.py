@@ -11,9 +11,6 @@ pluginsdir = path.abspath(path.join(path.dirname(__file__), "../plugins"))
 
 
 def queryPlugins():
-    db = Database()
-    conn = db.getConn()
-
     try:
         offset = int(request.args["offset"]) or 0
     except:
@@ -24,26 +21,22 @@ def queryPlugins():
     except:
         limit = 10
 
-    sql = "SELECT id, name, description FROM plugins LIMIT :limit OFFSET :offset"
 
-    plugins = conn.execute(sql, {
-        "offset": offset,
-        "limit": limit
-    }).fetchall()
-    totalNumber = conn.execute("SELECT COUNT(*) FROM plugins").fetchone()[0]
+    db = Database()
+    conn = db.getConn()
+    cr = conn.cursor()
 
-    datas = []
-    for plugin in plugins:
-        datas.append({
-            "id": plugin[0],
-            "name": plugin[1],
-            "description": plugin[2]
-        })
+    cr.execute("SELECT id, name, description FROM plugins LIMIT %s OFFSET %s", (limit, offset))
+    plugins = cr.fetchall()
 
+    cr.execute("SELECT COUNT(*) as count FROM plugins")
+    totalNumber = cr.fetchone()["count"]
+
+    cr.close()
     conn.close()
 
     return json.dumps({
-        "plugins": datas,
+        "plugins": plugins,
         "totalNumber": totalNumber
     })
 

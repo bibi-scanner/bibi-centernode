@@ -6,11 +6,13 @@ from infrastructure.repositories import getDomainRegistry
 from infrastructure.db import Database
 import requests
 import classes.ip2address
+import threading
 
 
 def queryTasks():
     db = Database()
     conn = db.getConn()
+    cr = conn.cursor()
 
     try:
         offset = int(request.args["offset"]) or 0
@@ -22,55 +24,46 @@ def queryTasks():
     except:
         limit = 10
 
-    sql = "SELECT id, name, status, createtime, completetime, progress FROM tasks ORDER BY createtime DESC LIMIT :limit OFFSET :offset"
+    cr.execute("SELECT id, name, status, createtime, completetime, progress FROM tasks ORDER BY createtime DESC LIMIT %s OFFSET %s", (limit, offset))
+    tasks = cr.fetchall()
 
-    tasks = conn.execute(sql, {
-        "offset": offset,
-        "limit": limit
-    }).fetchall()
-    totalNumber = conn.execute("SELECT COUNT(*) FROM tasks").fetchone()[0]
+    cr.execute("SELECT COUNT(*) as count FROM tasks")
+    totalNumber = cr.fetchone()["count"]
 
-    datas = []
-    for task in tasks:
-        datas.append({
-            "id": task[0],
-            "name": task[1],
-            "status": task[2],
-            "createtime": task[3],
-            "completetime": task[4],
-            "progress": task[5],
-        })
-
+    cr.close()
     conn.close()
 
     return json.dumps({
-        "tasks": datas,
+        "tasks": tasks,
         "totalNumber": totalNumber
     })
 
 def queryTaskDetail(taskId):
     db = Database()
     conn = db.getConn()
+    c = conn.cursor()
 
-    task = conn.execute("SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, plugins, node_id, scan_result FROM tasks WHERE id = :id", {
-        "id": taskId
-    }).fetchone()
+    c.execute(
+        "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, plugins, node_id, scan_result FROM tasks WHERE id = %s",
+        (taskId))
+
+    task = c.fetchone()
 
     if not task:
         return ("TASKID_IS_INEXISTENCE", 400)
     else:
         taskData = {
-            "id": task[0],
-            "name": task[1],
-            "status": task[2],
-            "createtime": task[3],
-            "completetime": task[4],
-            "progress": task[5],
-            "startIP": task[6],
-            "endIP": task[7],
-            "plugins": json.loads(task[8]),
-            "nodeId": task[9],
-            "scan_result": task[10] or None
+            "id": task["id"],
+            "name": task["name"],
+            "status": task["status"],
+            "createtime": task["createtime"],
+            "completetime": task["completetime"],
+            "progress": task["progress"],
+            "startIP": task["start_ip"],
+            "endIP": task["end_ip"],
+            "plugins": json.loads(task["plugins"]),
+            "nodeId": task["node_id"],
+            "scanResult": json.loads(task["scan_result"] or None)
         }
     conn.close()
 
@@ -96,9 +89,17 @@ def createTask():
     task.createtime = int(round(time.time() * 1000))
 
     getDomainRegistry().TaskRepository().save(task)
+    threading.Thread(target=sendTask, args=[task.id]).start()
 
     return json.dumps(task.toDict())
 
+def sendTask(id):
+    task = getDomainRegistry().TaskRepository().getTaskById(id)
+    nodeId = task.nodeId
+    node = getDomainRegistry().NodeRepository().getNodeById(nodeId)
+
+    if node:
+        r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/tasks")
 
 
 def updateTaskInfo(id, progress, result):
@@ -129,5 +130,25 @@ def closeTask(id):
 
     if node:
         r = requests.post("http://" + classes.ip2address.long2ip(node.ip) + ":" + str(node.port) + "/tasks/"+ task.id +"/complete")
+
+# 更新节点信息
+def autoUpdateTasksInfo():
+    def updateInfos():
+        db = Database()
+        conn = db.getConn()
+        while 1:
+            try:
+                cr = conn.cursor()
+                cr.execute("SELECT id, active, ip, port FROM nodes WHERE active = 1")
+                nodes = cr.fetchall()
+                cr.close()
+                for node in nodes:
+                    node = getDomainRegistry().NodeRepository().getNodeById(node["id"])
+                    node.updateNodeTasks()
+            finally:
+                time.sleep(5)
+
+    threading.Thread(target=updateInfos).start()
+
 
 

@@ -1,6 +1,7 @@
 from classes import Task, TaskStatus
 import json
 
+
 class TaskRepository:
 
     def __init__(self, db):
@@ -8,24 +9,27 @@ class TaskRepository:
 
     def getTaskById(self, id):
         conn = self.db.getConn()
-        data = conn.execute("SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result FROM tasks WHERE id=:id", {
-            "id": id
-        }).fetchone()
+        cr = conn.cursor()
+        cr.execute(
+            "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result FROM tasks WHERE id=%s",
+            (id))
+        data = cr.fetchone()
+        cr.close()
         conn.close()
 
         try:
             task = Task()
-            task.id = data[0]
-            task.name = data[1]
-            task.status = TaskStatus(data[2])
-            task.createtime = data[3]
-            task.completetime = data[4]
-            task.progress = data[5]
-            task.startIP = data[6]
-            task.endIP = data[7]
-            task.nodeId = data[8]
-            task.plugins = data[9]
-            task.scanResult = json.loads(data[10] or '""')
+            task.id = data["id"]
+            task.name = data["name"]
+            task.status = TaskStatus(data["status"])
+            task.createtime = data["createtime"]
+            task.completetime = data["completetime"]
+            task.progress = data["progress"]
+            task.startIP = data["start_ip"]
+            task.endIP = data["end_ip"]
+            task.nodeId = data["node_id"]
+            task.plugins = json.loads(data["plugins"] or "[]")
+            task.scanResult = json.loads(data["scan_result"] or '""')
         except:
             return None
 
@@ -34,52 +38,32 @@ class TaskRepository:
     def save(self, task):
         conn = self.db.getConn()
         c = conn.cursor()
-        data = c.execute("SELECT * FROM tasks WHERE id=:id", {
-            "id": task.id
-        }).fetchone()
+        c.execute("SELECT * FROM tasks WHERE id=%s", (task.id))
+        data = c.fetchone()
 
         if data:
             c.execute("UPDATE tasks SET "
-                      "name=:name,"
-                      "status=:status,"
-                      "createtime=:createtime,"
-                      "completetime=:completetime,"
-                      "progress=:progress,"
-                      "start_ip=:startIP,"
-                      "end_ip=:endIP,"
-                      "plugins=:plugins,"
-                      "node_id=:nodeId,"
-                      "scan_result=:scanResult"
-                      " WHERE id=:id", {
-                          "id": task.id,
-                          "name": task.name,
-                          "status": task.status.value,
-                          "createtime": task.createtime,
-                          "completetime": task.completetime,
-                          "progress": task.progress,
-                          "startIP": task.startIP,
-                          "endIP": task.endIP,
-                          "plugins": json.dumps(task.plugins),
-                          "nodeId": task.nodeId,
-                          "scanResult": json.dumps(task.scanResult or ""),
-                      })
+                      "name=%s,"
+                      "status=%s,"
+                      "createtime=%s,"
+                      "completetime=%s,"
+                      "progress=%s,"
+                      "start_ip=%s,"
+                      "end_ip=%s,"
+                      "plugins=%s,"
+                      "node_id=%s,"
+                      "scan_result=%s"
+                      " WHERE id=%s",
+                      (task.name, task.status.value, task.createtime, task.completetime, task.progress, task.startIP,
+                       task.endIP, json.dumps(task.plugins or []), task.nodeId, json.dumps(task.scanResult or ""), task.id))
         else:
-            c.execute("INSERT INTO tasks (id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result)"
-                      "VALUES (:id, :name, :status, :createtime, :completetime, :progress, :startIP, :endIP, :nodeId, :plugins, :scanResult)", {
-                          "id": task.id,
-                          "name": task.name,
-                          "status": task.status.value,
-                          "createtime": task.createtime,
-                          "completetime": task.completetime,
-                          "progress": task.progress,
-                          "startIP": task.startIP,
-                          "endIP": task.endIP,
-                          "plugins": json.dumps(task.plugins),
-                          "nodeId": task.nodeId,
-                          "scanResult": json.dumps(task.scanResult or ""),
-                      })
+            c.execute(
+                "INSERT INTO tasks (id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result)"
+                "VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s)",
+                (task.id, task.name, task.status.value, task.createtime, task.completetime, task.progress, task.startIP,
+                 task.endIP, task.nodeId, json.dumps(task.plugins), json.dumps(task.scanResult or "")))
+        c.close()
         conn.commit()
         conn.close()
 
         return None
-

@@ -1,10 +1,11 @@
-import sqlite3
+import pymysql
 import os
 
 class Database:
     def getConn(self):
-        dbpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test.db')
-        return sqlite3.connect(dbpath)
+        return pymysql.connect(host="10.10.9.120", user="root", password="root",
+                               db='scanner', charset='utf8', cursorclass=pymysql.cursors.DictCursor)
+
 
     def closeConn(self, conn):
         return conn.close()
@@ -12,14 +13,16 @@ class Database:
 def init():
     db = Database()
     conn = Database().getConn()
+    cr = conn.cursor()
 
     # 初始化
     sqlpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'init.sql')
     sqlf = open(sqlpath, 'r')
     data = sqlf.read()
     sqlf.read()
-    conn.executescript(data)
+    cr.execute(data)
 
-    db.closeConn(conn)
+    cr.close()
+    conn.close()
 
-init()
+# init()

@@ -5,5 +5,8 @@ def info():
     info["description"] = "啦啦啦啦啦啦啦啦啦测试插件"
     return info
 
-def poc():
-    return False
+def poc(ip, port):
+    return {
+        "descrition": "",
+        "result": True
+    }

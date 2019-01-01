@@ -76,3 +76,16 @@ def uploadPlugin():
             "description": plugin.description
         }
     })
+
+def downloadPluginById(pluginId):
+    db = Database()
+    conn = db.getConn()
+    cr = conn.cursor()
+
+    cr.execute("SELECT file FROM plugins WHERE id = %s", (pluginId))
+    plugin = cr.fetchone()
+
+    cr.close()
+    conn.close()
+
+    return plugin["file"]

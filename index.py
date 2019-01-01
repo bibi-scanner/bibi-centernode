@@ -138,6 +138,12 @@ def queryPlugins():
 def uploadPlugin():
     return pluginsInterfaces.uploadPlugin()
 
+# 下载插件
+# TODO
+@app.route('/plugins/<pluginId>', methods=['GET'])
+def downloadPluginById(pluginId):
+    return pluginsInterfaces.downloadPluginById(pluginId)
+
 
 
 

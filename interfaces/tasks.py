@@ -110,13 +110,13 @@ def updateTaskInfo(id, progress, result):
         return
 
     task.progress = progress
-    task.scanResult = result
 
     if progress == 0:
         task.status = TaskStatus(0)
     elif progress == 1 and result:
         closeTask(id)
         task.status = TaskStatus(2)
+        task.scanResult = result
         task.completetime = int(round(time.time() * 1000))
     else:
         task.status = TaskStatus(1)

@@ -61,6 +61,8 @@ class Task:
         self.progress = 0
         self.startIP = 0
         self.endIP = 0
+        self.startPort = 0
+        self.endPort = 0
         self.nodeId = ""
         self.plugins = []
         self.scanResult = None
@@ -75,6 +77,8 @@ class Task:
         data["progress"] = self.progress
         data["startIP"] = self.startIP
         data["endIP"] = self.endIP
+        data["startPort"] = self.startPort
+        data["endPort"] = self.endPort
         data["nodeId"] = self.nodeId
         data["plugins"] = self.nodeId
         data["scanResult"] = self.scanResult

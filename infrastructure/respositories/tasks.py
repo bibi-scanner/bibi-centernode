@@ -11,7 +11,7 @@ class TaskRepository:
         conn = self.db.getConn()
         cr = conn.cursor()
         cr.execute(
-            "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result FROM tasks WHERE id=%s",
+            "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, start_port, end_port, node_id, plugins, scan_result FROM tasks WHERE id=%s",
             (id))
         data = cr.fetchone()
         cr.close()
@@ -27,6 +27,8 @@ class TaskRepository:
             task.progress = data["progress"]
             task.startIP = data["start_ip"]
             task.endIP = data["end_ip"]
+            task.startPort = data["start_port"]
+            task.endPort = data["end_port"]
             task.nodeId = data["node_id"]
             task.plugins = json.loads(data["plugins"] or "[]")
             task.scanResult = json.loads(data["scan_result"] or '""')
@@ -50,18 +52,20 @@ class TaskRepository:
                       "progress=%s,"
                       "start_ip=%s,"
                       "end_ip=%s,"
+                      "start_port=%s,"
+                      "end_port=%s,"
                       "plugins=%s,"
                       "node_id=%s,"
                       "scan_result=%s"
                       " WHERE id=%s",
-                      (task.name, task.status.value, task.createtime, task.completetime, task.progress, task.startIP,
-                       task.endIP, json.dumps(task.plugins or []), task.nodeId, json.dumps(task.scanResult or ""), task.id))
+                      (task.name, task.status.value, task.createtime, task.completetime, task.progress, task.startIP, task.endIP,
+                       task.startPort, task.endPort, json.dumps(task.plugins or []), task.nodeId, json.dumps(task.scanResult or ""), task.id))
         else:
             c.execute(
-                "INSERT INTO tasks (id, name, status, createtime, completetime, progress, start_ip, end_ip, node_id, plugins, scan_result)"
-                "VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO tasks (id, name, status, createtime, completetime, progress, start_ip, end_ip, start_port, end_port, node_id, plugins, scan_result)"
+                "VALUES (%s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (task.id, task.name, task.status.value, task.createtime, task.completetime, task.progress, task.startIP,
-                 task.endIP, task.nodeId, json.dumps(task.plugins), json.dumps(task.scanResult or "")))
+                 task.endIP, task.startPort, task.endPort, task.nodeId, json.dumps(task.plugins), json.dumps(task.scanResult or "")))
         c.close()
         conn.commit()
         conn.close()

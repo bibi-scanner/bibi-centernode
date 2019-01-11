@@ -11,7 +11,7 @@ def poc(ip, port):
     #    port = int(url.split(':')[-1]) if ':' in url else 6379  # 不指定端口则为默认端口
     payload = '\x2a\x31\x0d\x0a\x24\x34\x0d\x0a\x69\x6e\x66\x6f\x0d\x0a'
     s = socket.socket()
-    socket.setdefaulttimeout(10)
+    socket.setdefaulttimeout(2)
     try:
         host = url.split(':')[0]
         s.connect((host, port))

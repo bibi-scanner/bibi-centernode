@@ -72,7 +72,6 @@ def queryTasks():
 
 
 # 创建任务
-# TODO
 @app.route('/tasks', methods=['POST'])
 @jwt_required()
 def createTask():
@@ -80,11 +79,12 @@ def createTask():
 
 
 # 获取指定任务详情
-# TODO
 @app.route('/tasks/<taskId>', methods=['GET'])
 @jwt_required()
 def queryTaskDetail(taskId):
     return tasksInterfaces.queryTaskDetail(taskId)
+
+#TODO 删除任务
 
 # 查询节点列表
 @app.route('/nodes', methods=['GET'])
@@ -93,53 +93,45 @@ def queryNodes():
     return nodesInterfaces.queryNodes()
 
 # 创建节点
-# TODO
 @app.route('/nodes', methods=['POST'])
 @jwt_required()
 def createNode():
     return nodesInterfaces.createNode()
 
 # ping节点
-# TODO
 @app.route('/nodes/<nodeId>/ping', methods=['POST'])
 @jwt_required()
 def pingNode(nodeId):
     return nodesInterfaces.pingNode(nodeId)
 
 # 节点注册
-# TODO
 @app.route('/nodes/registry', methods=['POST'])
 def registryNode():
     return nodesInterfaces.registryNode()
 
 # 节点获取任务
-# TODO
 @app.route('/nodes/<nodeId>/tasks', methods=['GET'])
 def getNodeTasks(nodeId):
     return nodesInterfaces.getNodeTasks(nodeId)
 
 # 节点任务状态更新
-# TODO
 @app.route('/nodes/<nodeId>/tasks/update', methods=['POST'])
 def updateNodeTasks(nodeId):
     return nodesInterfaces.updateNodeTasks(nodeId)
 
 # 获取插件列表
-# TODO
 @app.route('/plugins', methods=['GET'])
 @jwt_required()
 def queryPlugins():
     return pluginsInterfaces.queryPlugins()
 
 # 上传插件
-# TODO
 @app.route('/plugins', methods=['POST'])
 @jwt_required()
 def uploadPlugin():
     return pluginsInterfaces.uploadPlugin()
 
 # 下载插件
-# TODO
 @app.route('/plugins/<pluginId>', methods=['GET'])
 def downloadPluginById(pluginId):
     return pluginsInterfaces.downloadPluginById(pluginId)

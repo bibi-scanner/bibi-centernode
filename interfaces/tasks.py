@@ -44,7 +44,7 @@ def queryTaskDetail(taskId):
     c = conn.cursor()
 
     c.execute(
-        "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, plugins, node_id, scan_result FROM tasks WHERE id = %s",
+        "SELECT id, name, status, createtime, completetime, progress, start_ip, end_ip, start_port, end_port, plugins, node_id, scan_result FROM tasks WHERE id = %s",
         (taskId))
 
     task = c.fetchone()
@@ -61,6 +61,8 @@ def queryTaskDetail(taskId):
             "progress": task["progress"],
             "startIP": task["start_ip"],
             "endIP": task["end_ip"],
+            "startPort": task["start_port"],
+            "endPort": task["end_port"],
             "plugins": json.loads(task["plugins"]),
             "nodeId": task["node_id"],
             "scanResult": json.loads(task["scan_result"] or None)
@@ -77,6 +79,8 @@ def createTask():
     assert data["name"]
     assert data["startIP"]
     assert data["endIP"]
+    assert data["startPort"] >= 0
+    assert data["endPort"] >= 0
     assert len(data["plugins"]) >= 0
     assert data["nodeId"]
 
@@ -84,6 +88,8 @@ def createTask():
     task.name = data["name"]
     task.startIP = data["startIP"]
     task.endIP = data["endIP"]
+    task.startPort = data["startPort"]
+    task.endPort = data["endPort"]
     task.plugins = data["plugins"]
     task.nodeId = data["nodeId"]
     task.createtime = int(round(time.time() * 1000))

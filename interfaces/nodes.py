@@ -57,7 +57,7 @@ def getNodeTasks(nodeId):
     conn = db.getConn()
     cr = conn.cursor()
 
-    cr.execute("SELECT id, status, start_ip as startIP, end_ip as endIP, plugins FROM tasks WHERE node_id = %s", (nodeId))
+    cr.execute("SELECT id, status, start_ip as startIP, end_ip as endIP, start_port as startPort, end_port as endPort, plugins FROM tasks WHERE node_id = %s", (nodeId))
     tasks = cr.fetchall()
 
     cr.close()

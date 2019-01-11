@@ -57,6 +57,8 @@ CREATE TABLE `tasks`  (
   `progress` float(32, 10) NULL DEFAULT NULL,
   `start_ip` int(128) NULL DEFAULT NULL,
   `end_ip` int(128) NULL DEFAULT NULL,
+  `start_port` int(128) NULL DEFAULT NULL,
+  `end_port` int(128) NULL DEFAULT NULL,
   `plugins` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `node_id` char(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `scan_result` longtext CHARACTER SET utf8 COLLATE utf8_general_ci NULL,
